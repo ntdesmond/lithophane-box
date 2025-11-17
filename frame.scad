@@ -40,9 +40,11 @@ module frame() {
     }
 
     // thin frame in front of lithophane
-    difference() {
-      lithophane_surface();
-      offset(r=3) offset(delta=-4) lithophane_surface();
+    linear_extrude(lithophane_offset) {
+      difference() {
+        lithophane_surface();
+        offset(r=3) offset(delta=-4) lithophane_surface();
+      }
     }
   }
 
@@ -50,6 +52,25 @@ module frame() {
   translate([0, 0, notch_offset.z]) {
     translate([notch_offset.x, 0, 0]) notch_pair();
     translate([-notch_offset.x, 0, 0]) notch_pair();
+  }
+
+  // led strip preview
+  if ($preview) {
+    translate([0, 0, led_strip_start]) {
+      color("#e7f071ff") {
+        linear_extrude(led_strip_thickness) {
+          difference() {
+            lithophane_surface();
+            offset(delta=-1) lithophane_surface();
+          }
+        }
+      }
+      color("#000") {
+        translate([0, lithophane_height / 2 - 1, 3])
+          rotate([90, 0, 0])
+            text("LED Strip preview", size=3, halign="center");
+      }
+    }
   }
 }
 

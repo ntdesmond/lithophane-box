@@ -7,7 +7,7 @@ module backpanel() {
     }
     translate([0, 0, backpanel_thickness]) {
 
-      linear_extrude(backpanel_thickness) {
+      linear_extrude(backpanel_protrusion) {
         difference() {
           lithophane_surface();
           offset(delta=-1) {
