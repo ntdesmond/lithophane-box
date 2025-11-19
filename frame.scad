@@ -68,7 +68,8 @@ module frame() {
       color("#000") {
         translate([0, lithophane_height / 2 - 1, 3])
           rotate([90, 0, 0])
-            text("LED Strip preview", size=3, halign="center");
+            linear_extrude(height=0.01)
+              text("LED Strip preview", size=3, halign="center");
       }
     }
   }
