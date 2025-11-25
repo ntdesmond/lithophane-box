@@ -5,11 +5,40 @@ aa_battery_size = [14.5, 50.5];
 
 thickness = 1.5;
 
-// box_size = aaa_battery_size + [thickness * 2, thickness * 2];
-
 battery_count = 3; // I use 3xAAA for 5v LED strip
 stack_in_line = !true;
 spacing = [0.7, 0.5];
+
+spring_thickness = 0.5;
+
+module spring_half() {
+
+  // dont even ask
+  line = concat(
+    // flat line
+    [[3, 2]],
+    // wide curve
+    [for (i = [1.5:-0.05:-1.5]) [i, sqrt(1 - ( (i - 1.5) / 3) ^ 2) * 2]],
+    // semi-circle (half of the spring)
+    [for (i = [-1.5:0.05:0]) [i, -sqrt(1 - ( (i + 0.75) / 0.75) ^ 2) * 0.75]]
+  );
+
+  offset(r=spring_thickness / 2)
+    polygon(concat(line, [for (i = [len(line) - 1:-1:0]) line[i] + [0.001, 0.001]]));
+}
+
+module spring_one_side() {
+  spring_half();
+  rotate([0, 0, 180]) spring_half();
+}
+
+module spring() {
+  linear_extrude(aaa_battery_size.x)
+    scale(aaa_battery_size.x / (12 + spring_thickness)) {
+      translate([-3, 0, 0]) spring_one_side();
+      mirror([1, 0, 0]) translate([-3, 0, 0]) spring_one_side();
+    }
+}
 
 module inline_separator() {
   translate([0, 0, aaa_battery_size.x]) {
@@ -98,3 +127,4 @@ module battery_box() {
 }
 
 battery_box();
+spring();
