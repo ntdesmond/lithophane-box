@@ -1,44 +1,20 @@
+use <spring.scad>;
+
 $fs = 0.5;
 
 aaa_battery_size = [10.5, 45];
 aa_battery_size = [14.5, 50.5];
 
-thickness = 1.5;
+thickness = 0.8;
 
 battery_count = 3; // I use 3xAAA for 5v LED strip
 stack_in_line = !true;
 spacing = [0.7, 0.5];
 
 spring_thickness = 0.5;
+spring_size = [aaa_battery_size.x, 3, aaa_battery_size.x - 0.05];
 
-module spring_half() {
-
-  // dont even ask
-  line = concat(
-    // flat line
-    [[3, 2]],
-    // wide curve
-    [for (i = [1.5:-0.05:-1.5]) [i, sqrt(1 - ( (i - 1.5) / 3) ^ 2) * 2]],
-    // semi-circle (half of the spring)
-    [for (i = [-1.5:0.05:0]) [i, -sqrt(1 - ( (i + 0.75) / 0.75) ^ 2) * 0.75]]
-  );
-
-  offset(r=spring_thickness / 2)
-    polygon(concat(line, [for (i = [len(line) - 1:-1:0]) line[i] + [0.001, 0.001]]));
-}
-
-module spring_one_side() {
-  spring_half();
-  rotate([0, 0, 180]) spring_half();
-}
-
-module spring() {
-  linear_extrude(aaa_battery_size.x)
-    scale(aaa_battery_size.x / (12 + spring_thickness)) {
-      translate([-3, 0, 0]) spring_one_side();
-      mirror([1, 0, 0]) translate([-3, 0, 0]) spring_one_side();
-    }
-}
+length_with_spring = aaa_battery_size.y + spring_size.y;
 
 module inline_separator() {
   translate([0, 0, aaa_battery_size.x]) {
@@ -65,11 +41,22 @@ module parallel_separator() {
             offset(r=2) {
               polygon(
                 [
-                  for (dim = [[0.1, 0], [1, 0], [1, 1], [0.1, 1], [0.1, 0.85], [0.5, 0.85], [0.5, 0.15], [0.1, 0.15]]) [dim.x * aaa_battery_size.x, dim.y * aaa_battery_size.y],
+                  for (
+                    dim = [
+                      [0.1, 0],
+                      [1, 0],
+                      [1, 1],
+                      [0.1, 1],
+                      [0.1, 0.85],
+                      [0.5, 0.85],
+                      [0.5, 0.15],
+                      [0.1, 0.15],
+                    ]
+                  ) [dim.x * aaa_battery_size.x, dim.y * length_with_spring],
                 ]
               );
             }
-          square(aaa_battery_size);
+          square([aaa_battery_size.x, length_with_spring]);
         }
       }
     }
@@ -88,7 +75,7 @@ module battery_box() {
         translate(stack_direction * i)
           linear_extrude(thickness + aaa_battery_size.x)
             offset(r=thickness)
-              square(aaa_battery_size);
+              square(aaa_battery_size + [0, spring_size.y]);
       }
 
       // battery compartment
@@ -98,11 +85,11 @@ module battery_box() {
             stack_in_line ?
               [
                 aaa_battery_size.x,
-                aaa_battery_size.y * battery_count + spacing.y * (battery_count - 1),
+                length_with_spring + (aaa_battery_size.y + spacing.y) * (battery_count - 1),
               ]
             : [
               aaa_battery_size.x * battery_count + spacing.x * (battery_count - 1),
-              aaa_battery_size.y,
+              length_with_spring,
             ]
           );
         }
@@ -112,10 +99,10 @@ module battery_box() {
     // separators
     separator_offset =
       stack_in_line ?
-        [0, 0, 0]
-      : [spacing.x / 2, 0, 0];
+        [0, spring_size.y, 0]
+      : [0, 0, 0];
     for (i = [1:battery_count - 1]) {
-      translate(stack_direction * i) {
+      translate(separator_offset + stack_direction * i) {
         if (stack_in_line) {
           inline_separator();
         } else {
@@ -123,8 +110,22 @@ module battery_box() {
         }
       }
     }
+
+    // springs
+    spring_start_offset = [-spring_thickness / 2, 0];
+    if (stack_in_line) {
+      translate(spring_start_offset) {
+        spring(spring_size);
+      }
+    } else {
+      for (i = [0:battery_count - 1]) {
+        translate(spring_start_offset + stack_direction * i) {
+          spring(spring_size);
+        }
+      }
+    }
   }
 }
 
 battery_box();
-spring();
+// spring();
