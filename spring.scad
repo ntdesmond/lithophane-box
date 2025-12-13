@@ -22,8 +22,8 @@ module spring_one_side() {
 
 module spring(dimensions = [10, 3, 10], thickness = 0.5) {
   spring_scale = [
-    dimensions.x / base_spring_size.x,
-    dimensions.y / base_spring_size.y,
+    (dimensions.x - thickness) / (base_spring_size.x),
+    (dimensions.y - thickness) / (base_spring_size.y),
   ];
   spring_size = [
     base_spring_size.x * spring_scale.x,
