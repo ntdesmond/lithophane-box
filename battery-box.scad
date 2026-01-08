@@ -14,7 +14,8 @@ spacing = [0.7, 0.5];
 spring_thickness = 0.5;
 spring_size = [aaa_battery_size.x, 3, aaa_battery_size.x - 0.05];
 
-parallel_cells_length = aaa_battery_size.y + spring_size.y + spacing.y;
+cell_with_spring_length = aaa_battery_size.y + spring_size.y + spacing.y;
+cell_without_spring_length = aaa_battery_size.y + spacing.y;
 
 module inline_separator() {
   translate([0, spacing.y, aaa_battery_size.x]) {
@@ -52,11 +53,11 @@ module parallel_separator() {
                       [0.5, 0.15],
                       [0.1, 0.15],
                     ]
-                  ) [dim.x * aaa_battery_size.x, dim.y * parallel_cells_length],
+                  ) [dim.x * aaa_battery_size.x, dim.y * cell_with_spring_length],
                 ]
               );
             }
-          square([aaa_battery_size.x, parallel_cells_length]);
+          square([aaa_battery_size.x, cell_with_spring_length]);
         }
       }
     }
@@ -86,9 +87,13 @@ module terminal() {
   }
 }
 
-module wall() {
+module wall(length) {
   linear_extrude(height=aaa_battery_size.x)
-    square([spacing.x, parallel_cells_length]);
+    square([spacing.x, length]);
+}
+
+module wall_without_spring() {
+  wall(cell_without_spring_length);
 }
 
 module battery_box() {
@@ -96,19 +101,40 @@ module battery_box() {
   inline_cell_size = [aaa_battery_size.x, spacing.y + aaa_battery_size.y];
   parallel_cell_size = [spacing.x + aaa_battery_size.x, aaa_battery_size.y];
   if (stack_in_line) {
-    //TODO: walls and terminal
-    cell_with_spring();
+    //TODO: proper terminals with holes
+    wall_length = cell_with_spring_length + cell_without_spring_length * (battery_count - 1);
+    wall(wall_length);
+    translate([spacing.x, 0]) {
+      cell_with_spring();
+      translate([spring_size.x, 0]) {
+        wall(wall_length);
+      }
+    }
     for (i = [1:battery_count - 1]) {
       offset = [0, first_cell_size.y + inline_cell_size.y * (i - 1)];
       translate(offset) {
-        inline_separator();
-        translate([0, spacing.y]) cell_without_spring();
+        translate([spacing.x, 0]) {
+          inline_separator();
+          translate([0, spacing.y]) cell_without_spring();
+        }
       }
     }
+    translate(
+      [spacing.x, first_cell_size.y + inline_cell_size.y * (battery_count - 1)]
+    ) {
+      terminal();
+    }
   } else {
-    wall();
-    translate([spacing.x + first_cell_size.x + parallel_cell_size.x * (battery_count - 1), 0, 0]) wall();
-    translate([spacing.x, 0, 0]) {
+    wall(cell_with_spring_length);
+    translate(
+      [
+        spacing.x + first_cell_size.x + parallel_cell_size.x * (battery_count - 1),
+        0,
+      ]
+    ) {
+      wall(cell_with_spring_length);
+    }
+    translate([spacing.x, 0]) {
       cell_with_spring();
       translate([0, first_cell_size.y, 0]) terminal();
       for (i = [1:battery_count - 1]) {
