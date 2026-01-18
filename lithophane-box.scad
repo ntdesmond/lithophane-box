@@ -7,7 +7,13 @@ show_frame = true;
 show_backpanel = true;
 
 module switch_placed() {
-  translate([-(lithophane_width / 2 + wall_thickness), -(lithophane_height / 2 - 3), led_strip_start + led_strip_thickness])
+  translate(
+    [
+      -(lithophane_width / 2 + wall_thickness),
+      -(lithophane_height / 2 - 3),
+      wall_height - get_switch_body_dimensions().z,
+    ]
+  )
     switch(body_offset=0.1);
 }
 
