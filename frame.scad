@@ -29,48 +29,63 @@ module notch_pair() {
   mirror([0, 1, 0]) translate([0, notch_offset.y, 0]) notch();
 }
 
-module frame() {
-  color("#0abeebab") {
-    // walls
-    linear_extrude(height=wall_height) {
-      difference() {
-        box_surface();
-        lithophane_surface();
-      }
-    }
-
-    // thin frame in front of lithophane
-    linear_extrude(lithophane_offset) {
-      difference() {
-        lithophane_surface();
-        offset(r=3) offset(delta=-4) lithophane_surface();
-      }
-    }
-  }
-
-  // notches to secure lithophane in place
-  translate([0, 0, notch_offset.z]) {
-    translate([notch_offset.x, 0, 0]) notch_pair();
-    translate([-notch_offset.x, 0, 0]) notch_pair();
-  }
-
-  // led strip preview
-  if ($preview) {
-    translate([0, 0, led_strip_start]) {
-      color("#e7f071ff") {
-        linear_extrude(led_strip_thickness) {
-          difference() {
-            lithophane_surface();
-            offset(delta=-1) lithophane_surface();
-          }
+module led_strip() {
+  translate([0, 0, led_strip_start]) {
+    color("#e7f071ff") {
+      linear_extrude(led_strip_thickness) {
+        difference() {
+          offset(delta=0.3) lithophane_surface();
+          offset(delta=-1) lithophane_surface();
         }
       }
-      color("#000") {
-        translate([0, lithophane_height / 2 - 1, 3])
-          rotate([90, 0, 0])
-            linear_extrude(height=0.01)
-              text("LED Strip preview", size=3, halign="center");
+    }
+    color("#000") {
+      translate([0, lithophane_height / 2 - 1, 3])
+        rotate([90, 0, 0])
+          linear_extrude(height=0.01)
+            text("LED Strip preview", size=3, halign="center");
+    }
+  }
+}
+
+module frame_with_notches() {
+  union() {
+    color("#0abeebab") {
+      // walls
+      linear_extrude(height=wall_height) {
+        difference() {
+          box_surface();
+          lithophane_surface();
+        }
       }
+
+      // thin frame in front of lithophane
+      linear_extrude(lithophane_offset) {
+        difference() {
+          lithophane_surface();
+          offset(r=3) offset(delta=-4) lithophane_surface();
+        }
+      }
+    }
+
+    // notches to secure lithophane in place
+    translate([0, 0, notch_offset.z]) {
+      translate([notch_offset.x, 0, 0]) notch_pair();
+      translate([-notch_offset.x, 0, 0]) notch_pair();
+    }
+  }
+}
+
+module frame() {
+  if ($preview) {
+    union() {
+      frame_with_notches();
+      led_strip();
+    }
+  } else {
+    difference() {
+      frame_with_notches();
+      led_strip();
     }
   }
 }
