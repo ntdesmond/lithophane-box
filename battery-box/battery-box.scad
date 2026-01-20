@@ -8,7 +8,7 @@ aa_battery_size = [14.5, 50.5];
 
 thickness = 0.8;
 
-battery_count = 1; // I use 3xAAA for 5v LED strip
+battery_count = 3; // I use 3xAAA for 5v LED strip
 stack_in_line = !true;
 spacing = [0.7, 0.5];
 
@@ -38,27 +38,40 @@ module parallel_separator() {
   translate([0, 0, aaa_battery_size.x]) {
     rotate([0, 90, 0]) {
       linear_extrude(spacing.x) {
-        intersection() {
-          offset(r=-1)
-            offset(r=2) {
-              polygon(
-                [
-                  for (
-                    dim = [
-                      [0.1, 0],
-                      [1, 0],
-                      [1, 1],
-                      [0.1, 1],
-                      [0.1, 0.85],
-                      [0.5, 0.85],
-                      [0.5, 0.15],
-                      [0.1, 0.15],
-                    ]
-                  ) [dim.x * aaa_battery_size.x, dim.y * cell_with_spring_length],
-                ]
-              );
-            }
-          square([aaa_battery_size.x, cell_with_spring_length]);
+        difference() {
+          intersection() {
+            offset(r=-1)
+              offset(r=2) {
+                polygon(
+                  [
+                    for (
+                      dim = [
+                        [0.1, 0],
+                        [1, 0],
+                        [1, 1],
+                        [0.1, 1],
+                        [0.1, 0.85],
+                        [0.5, 0.85],
+                        [0.5, 0.15],
+                        [0.1, 0.15],
+                      ]
+                    ) [dim.x * aaa_battery_size.x, dim.y * cell_with_spring_length],
+                  ]
+                );
+              }
+            square([aaa_battery_size.x, cell_with_spring_length]);
+          }
+          slot_offset = spacing.y;
+          slot_width = spacing.y * 1.5;
+          translate(
+            [
+              aaa_battery_size.x * 0.15,
+              cell_with_spring_length - slot_offset - slot_width,
+            ]
+          )
+            square([aaa_battery_size.x * 0.7, slot_width]);
+          translate([aaa_battery_size.x * 0.15, slot_offset])
+            square([aaa_battery_size.x * 0.7, slot_width]);
         }
       }
     }
@@ -156,4 +169,3 @@ module battery_box() {
 }
 
 battery_box();
-// cell_with_spring();
