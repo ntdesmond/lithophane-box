@@ -1,9 +1,10 @@
 use <frame.scad>
 use <backpanel.scad>
 use <switch.scad>
+use <battery-box/battery-box.scad>
 include <common.scad>
 
-show_frame = true;
+show_frame = !true;
 show_backpanel = true;
 
 module switch_placed() {
@@ -30,17 +31,21 @@ if (show_backpanel) {
   backpanel_y_offset = show_frame ? lithophane_height + wall_thickness * 3 : 0;
 
   translate([0, backpanel_y_offset, 0]) {
-    rotate(-backpanel_rotation) {
-      translate(-backpanel_placement) {
-        difference() {
-          translate(backpanel_placement) {
-            rotate(backpanel_rotation) {
-              backpanel();
+    difference() {
+      rotate(-backpanel_rotation) {
+        translate(-backpanel_placement) {
+          difference() {
+            translate(backpanel_placement) {
+              rotate(backpanel_rotation) {
+                backpanel();
+              }
             }
+            switch_placed();
           }
-          switch_placed();
         }
       }
+      rotate([0, 0, 90])
+        battery_box_cutout();
     }
   }
 }

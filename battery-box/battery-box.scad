@@ -168,4 +168,32 @@ module battery_box() {
   }
 }
 
+function get_battery_box_dimensions() =
+  (stack_in_line) ?
+    [
+      aaa_battery_size.x + spacing.x * 2,
+      // wall_length
+      cell_with_spring_length + cell_without_spring_length * (battery_count - 1),
+      aaa_battery_size.x,
+    ]
+  : [
+    aaa_battery_size.x * battery_count + spacing.x * (battery_count + 1),
+    cell_with_spring_length,
+    aaa_battery_size.x,
+  ];
+
+module battery_box_cutout() {
+  color("#d888")
+    cube(get_battery_box_dimensions() + [0.2, 0.2, 0.2], center=true);
+}
+
+if ($preview)
+  translate(
+    get_battery_box_dimensions() / 2 + [
+      get_battery_box_dimensions().x * 1.2,
+      0,
+      0,
+    ]
+  )
+    battery_box_cutout();
 battery_box();
