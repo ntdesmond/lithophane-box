@@ -1,7 +1,7 @@
 $fs = 0.5;
 
-lithophane_width = 140;
-lithophane_height = 100;
+lithophane_width = 121;
+lithophane_height = 91;
 lithophane_thickness = 4;
 lithophane_offset = 1;
 led_strip_thickness = 10;

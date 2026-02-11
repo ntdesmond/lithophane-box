@@ -18,6 +18,24 @@ spring_size = [aaa_battery_size.x, 3, aaa_battery_size.x - 0.05];
 cell_with_spring_length = aaa_battery_size.y + spring_size.y + spacing.y;
 cell_without_spring_length = aaa_battery_size.y + spacing.y;
 
+function get_battery_box_dimensions() =
+  (stack_in_line) ?
+    [
+      aaa_battery_size.x + spacing.x * 2,
+      // wall_length
+      cell_with_spring_length + cell_without_spring_length * (battery_count - 1),
+      aaa_battery_size.x,
+    ]
+  : [
+    aaa_battery_size.x * battery_count + spacing.x * (battery_count + 1),
+    cell_with_spring_length,
+    aaa_battery_size.x,
+  ];
+
+notch_width = 1;
+
+function get_notch_height() = notch_width * sqrt(2);
+
 module inline_separator() {
   translate([0, spacing.y, aaa_battery_size.x]) {
     rotate([90, 90, 0]) {
@@ -104,6 +122,18 @@ module terminal_sized() {
   terminal([aaa_battery_size.x, spacing.y, aaa_battery_size.x]);
 }
 
+module notch() {
+  notch_base_size = [get_battery_box_dimensions().x, get_battery_box_dimensions().y, 0.01];
+  difference() {
+    hull() {
+      cube(notch_base_size, center=true);
+      translate([0, 0, get_notch_height()])
+        cube(notch_base_size + notch_width * 2 * [1, 1, 0], center=true);
+    }
+    cube(get_battery_box_dimensions(), center=true);
+  }
+}
+
 module battery_box() {
   first_cell_size = [aaa_battery_size.x, spring_size.y + aaa_battery_size.y];
   inline_cell_size = [aaa_battery_size.x, spacing.y + aaa_battery_size.y];
@@ -166,34 +196,30 @@ module battery_box() {
       }
     }
   }
+
+  translate(
+    get_battery_box_dimensions() / 2 + [0, 0, get_battery_box_dimensions().z / 2 - get_notch_height()]
+  )
+    notch();
 }
 
-function get_battery_box_dimensions() =
-  (stack_in_line) ?
-    [
-      aaa_battery_size.x + spacing.x * 2,
-      // wall_length
-      cell_with_spring_length + cell_without_spring_length * (battery_count - 1),
-      aaa_battery_size.x,
-    ]
-  : [
-    aaa_battery_size.x * battery_count + spacing.x * (battery_count + 1),
-    cell_with_spring_length,
-    aaa_battery_size.x,
-  ];
-
 module battery_box_cutout() {
-  color("#d888")
-    cube(get_battery_box_dimensions() + [0.2, 0.2, 0.2], center=true);
+  translation_up = [0, 0, get_battery_box_dimensions().z / 2];
+  color("#d888") {
+    translate(translation_up) {
+      cube(get_battery_box_dimensions() + [0.2, 0.2, 0.2], center=true);
+      translate([0, 0, get_battery_box_dimensions().z / 2 - get_notch_height()])
+        notch();
+    }
+  }
 }
 
 if ($preview)
   translate(
-    get_battery_box_dimensions() / 2 + [
-      get_battery_box_dimensions().x * 1.2,
-      0,
-      0,
-    ]
+    [get_battery_box_dimensions().x, get_battery_box_dimensions().y, 0] / 2 + (
+      [get_battery_box_dimensions().x * 1.2, 0, 0]
+    )
   )
     battery_box_cutout();
+
 battery_box();
