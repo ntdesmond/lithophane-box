@@ -17,8 +17,8 @@ wall_thickness = 5;
 
 lithophane_size = [lithophane_width, lithophane_height];
 
-notch_width = 10;
-notch_height = 1.2;
+frame_notch_width = 10;
+frame_notch_height = 1.2;
 
 module lithophane_surface() {
   square(size=lithophane_size, center=true);

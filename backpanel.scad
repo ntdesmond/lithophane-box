@@ -22,7 +22,7 @@ module keyhole(diameter = 5) {
   }
 }
 
-module backpanel() {
+module backpanel(battery_vars) {
   difference() {
     color("#055366ab") {
       linear_extrude(backpanel_thickness) {
@@ -40,10 +40,10 @@ module backpanel() {
       }
     }
     rotate([180, 0, 90])
-      translate([0, 0, -get_battery_box_dimensions().z])
-        battery_box_cutout();
+      translate([0, 0, -get_battery_box_dimensions(battery_vars).z])
+        battery_box_cutout(battery_vars);
 
-    translate([0, lithophane_height / 2 * 0.6, -0.01])
+    translate([0, lithophane_height / 2 * 0.7, -0.01])
       keyhole(diameter=6);
   }
 }

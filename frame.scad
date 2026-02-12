@@ -1,5 +1,8 @@
 include <common.scad>
 
+notch_width = frame_notch_width;
+notch_height = frame_notch_height;
+
 module notch() {
   color("#ca5a109f") {
     translate([-notch_width / 2, 0, notch_height]) {

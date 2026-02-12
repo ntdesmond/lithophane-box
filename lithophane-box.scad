@@ -6,6 +6,20 @@ include <common.scad>
 show_frame = !true;
 show_backpanel = true;
 
+/* [Battery box] */
+battery_count = 3; // I use 3xAAA for 5v LED strip
+stack_in_line = false;
+notch_width = 1; // .1
+battery_type = 1; // [0:AA, 1:AAA]
+
+function packed_battery_vars() =
+  [
+    battery_count,
+    stack_in_line,
+    notch_width,
+    battery_type,
+  ];
+
 module switch_placed() {
   translate(
     [
@@ -19,7 +33,7 @@ module switch_placed() {
 
 if (show_frame) {
   difference() {
-    union() frame();
+    frame();
     switch_placed();
   }
 }
@@ -35,7 +49,7 @@ if (show_backpanel) {
         difference() {
           translate(backpanel_placement) {
             rotate(backpanel_rotation) {
-              backpanel();
+              backpanel(packed_battery_vars());
             }
           }
           switch_placed();

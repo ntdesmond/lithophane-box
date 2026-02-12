@@ -1,27 +1,51 @@
 use <spring.scad>;
 use <terminal.scad>;
 
-$fs = 0.5;
+//only for preview
+use <../lithophane-box.scad>
+default_vars = packed_battery_vars();
 
-aaa_battery_size = [10.5, 45];
-aa_battery_size = [14.5, 50.5];
+function get_battery_count(vars) = vars[0];
+function get_stack_in_line(vars) = vars[1];
+function get_notch_width(vars) = vars[2];
+function get_battery_type(vars) = vars[3];
 
-battery_size = aaa_battery_size;
+/* [Hidden] */
+battery_sizes = [
+  [14.5, 50.5], // AA
+  [10.5, 45], // AAA
+];
+
+function get_battery_size(vars) = battery_sizes[get_battery_type(vars)];
 
 thickness = 0.8;
-
-battery_count = 3; // I use 3xAAA for 5v LED strip
-stack_in_line = !true;
 spacing = [0.7, 0.5];
 
 spring_thickness = 0.5;
-spring_size = [battery_size.x, 3, battery_size.x - 0.05];
 
-cell_with_spring_length = battery_size.y + spring_size.y + spacing.y;
-cell_without_spring_length = battery_size.y + spacing.y;
+function get_spring_size(vars) =
+  let (
+    battery_size = get_battery_size(vars)
+  ) [battery_size.x, 3, battery_size.x - 0.05];
 
-function get_battery_box_dimensions() =
-  (stack_in_line) ?
+function get_cell_without_spring_length(vars) =
+  let (
+    battery_size = get_battery_size(vars)
+  ) battery_size.y + spacing.y;
+
+function get_cell_with_spring_length(vars) =
+  let (
+    spring_size = get_spring_size(vars)
+  ) spring_size.y + get_cell_without_spring_length(vars);
+
+function get_battery_box_dimensions(vars) =
+  let (
+    stack_in_line = get_stack_in_line(vars),
+    battery_count = get_battery_count(vars),
+    battery_size = get_battery_size(vars),
+    cell_with_spring_length = get_cell_with_spring_length(vars),
+    cell_without_spring_length = get_cell_without_spring_length(vars)
+  ) (stack_in_line) ?
     [
       battery_size.x + spacing.x * 2,
       // wall_length
@@ -34,11 +58,11 @@ function get_battery_box_dimensions() =
     battery_size.x,
   ];
 
-notch_width = 1;
+function get_notch_height(vars) = get_notch_width(vars) * sqrt(2);
 
-function get_notch_height() = notch_width * sqrt(2);
+module inline_separator(vars) {
+  battery_size = get_battery_size(vars);
 
-module inline_separator() {
   translate([0, spacing.y, battery_size.x]) {
     rotate([90, 90, 0]) {
       linear_extrude(spacing.y) {
@@ -54,7 +78,10 @@ module inline_separator() {
   }
 }
 
-module parallel_separator() {
+module parallel_separator(vars) {
+  battery_size = get_battery_size(vars);
+  cell_with_spring_length = get_cell_with_spring_length(vars);
+
   translate([0, 0, battery_size.x]) {
     rotate([0, 90, 0]) {
       linear_extrude(spacing.x) {
@@ -98,7 +125,10 @@ module parallel_separator() {
   }
 }
 
-module cell_with_spring() {
+module cell_with_spring(vars) {
+  spring_size = get_spring_size(vars);
+  battery_size = get_battery_size(vars);
+
   spring_offset = [0, 0.5];
   spring(spring_size);
   linear_extrude(thickness)
@@ -106,47 +136,67 @@ module cell_with_spring() {
       square(battery_size - spring_offset);
 }
 
-module cell_without_spring() {
+module cell_without_spring(vars) {
+  battery_size = get_battery_size(vars);
+
   linear_extrude(thickness)
     square(battery_size);
 }
 
-module wall(length) {
+module wall(vars, length) {
+  battery_size = get_battery_size(vars);
+
   linear_extrude(height=battery_size.x)
     square([spacing.x, length]);
 }
 
-module wall_without_spring() {
-  wall(cell_without_spring_length);
+module wall_without_spring(vars) {
+  wall(vars, get_cell_without_spring_length(vars));
 }
 
-module terminal_sized() {
+module terminal_sized(vars) {
+  battery_size = get_battery_size(vars);
+
   terminal([battery_size.x, spacing.y, battery_size.x]);
 }
 
-module notch() {
-  notch_base_size = [get_battery_box_dimensions().x, get_battery_box_dimensions().y, 0.01];
+module notch(vars) {
+  box_dimensions = get_battery_box_dimensions(vars);
+  notch_width = get_notch_width(vars);
+
+  notch_base_size = [
+    box_dimensions.x,
+    box_dimensions.y,
+    0.01,
+  ];
   difference() {
     hull() {
       cube(notch_base_size, center=true);
-      translate([0, 0, get_notch_height()])
+      translate([0, 0, get_notch_height(vars)])
         cube(notch_base_size + notch_width * 2 * [1, 1, 0], center=true);
     }
-    cube(get_battery_box_dimensions(), center=true);
+    cube(box_dimensions, center=true);
   }
 }
 
-module battery_box() {
+module battery_box(vars) {
+  battery_count = get_battery_count(vars);
+  stack_in_line = get_stack_in_line(vars);
+  battery_size = get_battery_size(vars);
+  cell_with_spring_length = get_cell_with_spring_length(vars);
+  cell_without_spring_length = get_cell_without_spring_length(vars);
+  spring_size = get_spring_size(vars);
+
   first_cell_size = [battery_size.x, spring_size.y + battery_size.y];
   inline_cell_size = [battery_size.x, spacing.y + battery_size.y];
   parallel_cell_size = [spacing.x + battery_size.x, battery_size.y];
   if (stack_in_line) {
     wall_length = cell_with_spring_length + cell_without_spring_length * (battery_count - 1);
-    wall(wall_length);
+    wall(vars, wall_length);
     translate([spacing.x, 0]) {
-      cell_with_spring();
+      cell_with_spring(vars);
       translate([spring_size.x, 0]) {
-        wall(wall_length);
+        wall(vars, wall_length);
       }
     }
     if (battery_count > 1) {
@@ -154,8 +204,8 @@ module battery_box() {
         offset = [0, first_cell_size.y + inline_cell_size.y * (i - 1)];
         translate(offset) {
           translate([spacing.x, 0]) {
-            inline_separator();
-            translate([0, spacing.y]) cell_without_spring();
+            inline_separator(vars);
+            translate([0, spacing.y]) cell_without_spring(vars);
           }
         }
       }
@@ -163,35 +213,35 @@ module battery_box() {
     translate(
       [spacing.x, first_cell_size.y + inline_cell_size.y * (battery_count - 1)]
     ) {
-      terminal_sized();
+      terminal_sized(vars);
     }
   } else {
-    wall(cell_with_spring_length);
+    wall(vars, cell_with_spring_length);
     translate(
       [
         spacing.x + first_cell_size.x + parallel_cell_size.x * (battery_count - 1),
         0,
       ]
     ) {
-      wall(cell_with_spring_length);
+      wall(vars, cell_with_spring_length);
     }
     translate([spacing.x, 0]) {
-      cell_with_spring();
-      translate([0, first_cell_size.y, 0]) terminal_sized();
+      cell_with_spring(vars);
+      translate([0, first_cell_size.y, 0]) terminal_sized(vars);
       if (battery_count > 1) {
         for (i = [1:battery_count - 1]) {
           offset = [first_cell_size.x + parallel_cell_size.x * (i - 1), 0];
           translate(offset) {
-            parallel_separator();
+            parallel_separator(vars);
             if (i % 2 == 1) {
               translate([0, first_cell_size.y + spacing.y])
                 mirror([0, 1, 0]) {
-                  translate([spacing.x, 0]) cell_with_spring();
-                  translate([spacing.x, first_cell_size.y, 0]) terminal_sized();
+                  translate([spacing.x, 0]) cell_with_spring(vars);
+                  translate([spacing.x, first_cell_size.y, 0]) terminal_sized(vars);
                 }
             } else {
-              translate([spacing.x, 0]) cell_with_spring();
-              translate([spacing.x, first_cell_size.y, 0]) terminal_sized();
+              translate([spacing.x, 0]) cell_with_spring(vars);
+              translate([spacing.x, first_cell_size.y, 0]) terminal_sized(vars);
             }
           }
         }
@@ -199,29 +249,35 @@ module battery_box() {
     }
   }
 
+  box_dimensions = get_battery_box_dimensions(vars);
   translate(
-    get_battery_box_dimensions() / 2 + [0, 0, get_battery_box_dimensions().z / 2 - get_notch_height()]
+    box_dimensions / 2 + [0, 0, box_dimensions.z / 2 - get_notch_height(vars)]
   )
-    notch();
+    notch(vars);
 }
 
-module battery_box_cutout() {
-  translation_up = [0, 0, get_battery_box_dimensions().z / 2];
+module battery_box_cutout(vars) {
+  box_dimensions = get_battery_box_dimensions(vars);
+
+  translation_up = [0, 0, box_dimensions.z / 2];
   color("#d888") {
     translate(translation_up) {
-      cube(get_battery_box_dimensions() + [0.2, 0.2, 0.2], center=true);
-      translate([0, 0, get_battery_box_dimensions().z / 2 - get_notch_height()])
-        notch();
+      cube(box_dimensions + [0.2, 0.2, 0.2], center=true);
+      translate([0, 0, box_dimensions.z / 2 - get_notch_height(vars)])
+        notch(vars);
     }
   }
 }
 
-if ($preview)
+if ($preview) {
+  box_dimensions = get_battery_box_dimensions(default_vars);
   translate(
-    [get_battery_box_dimensions().x, get_battery_box_dimensions().y, 0] / 2 + (
-      [get_battery_box_dimensions().x * 1.2, 0, 0]
+    [box_dimensions.x, box_dimensions.y, 0] / 2 + (
+      [box_dimensions.x + 10, 0, 0]
     )
   )
-    battery_box_cutout();
+    battery_box_cutout(default_vars);
+}
 
-battery_box();
+battery_box(default_vars);
+echo(str("default_vars = ", default_vars));
