@@ -1,6 +1,9 @@
 include <common.scad>
 use <battery-box/battery-box.scad>
 
+//only for preview
+use <lithophane-box.scad>
+
 module keyhole(diameter = 5) {
   radius = diameter / 2;
   height = radius;
@@ -22,18 +25,18 @@ module keyhole(diameter = 5) {
   }
 }
 
-module backpanel(battery_vars) {
+module backpanel(lithophane_vars, battery_vars) {
   difference() {
     color("#055366ab") {
       linear_extrude(backpanel_thickness) {
-        box_surface();
+        box_surface(lithophane_vars);
       }
       translate([0, 0, backpanel_thickness]) {
         linear_extrude(backpanel_protrusion) {
           difference() {
-            lithophane_surface();
+            lithophane_surface(lithophane_vars);
             offset(delta=-1) {
-              lithophane_surface();
+              lithophane_surface(lithophane_vars);
             }
           }
         }
@@ -43,9 +46,13 @@ module backpanel(battery_vars) {
       translate([0, 0, -get_battery_box_dimensions(battery_vars).z])
         battery_box_cutout(battery_vars);
 
-    translate([0, lithophane_height / 2 * 0.7, -0.01])
+    translate([0, get_lithophane_height(lithophane_vars) / 2 * 0.7, -0.01])
       keyhole(diameter=6);
   }
 }
 
-backpanel();
+backpanel(
+  // only for preview
+  packed_lithophane_vars(),
+  packed_battery_vars()
+);

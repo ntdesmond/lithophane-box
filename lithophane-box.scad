@@ -3,8 +3,21 @@ use <backpanel.scad>
 use <switch.scad>
 include <common.scad>
 
-show_frame = !true;
+show_frame = true;
 show_backpanel = true;
+
+/* [Lithophane] */
+lithophane_width = 120;
+lithophane_height = 90;
+lithophane_thickness = 4;
+
+function packed_lithophane_vars() =
+  [
+    lithophane_width,
+    lithophane_height,
+    lithophane_thickness,
+  ];
+lithophane_vars = packed_lithophane_vars();
 
 /* [Battery box] */
 battery_count = 3; // I use 3xAAA for 5v LED strip
@@ -20,7 +33,13 @@ function packed_battery_vars() =
     battery_type,
   ];
 
-module switch_placed() {
+module switch_placed(lithophane_vars) {
+  lithophane_width = get_lithophane_width(lithophane_vars);
+  lithophane_height = get_lithophane_height(lithophane_vars);
+  wall_height = get_wall_height(
+    get_lithophane_thickness(lithophane_vars)
+  );
+
   translate(
     [
       -(lithophane_width / 2 + wall_thickness),
@@ -33,12 +52,17 @@ module switch_placed() {
 
 if (show_frame) {
   difference() {
-    frame();
-    switch_placed();
+    frame(lithophane_vars);
+    switch_placed(lithophane_vars);
   }
 }
 
 if (show_backpanel) {
+  wall_height = get_wall_height(
+    get_lithophane_thickness(lithophane_vars)
+  );
+  lithophane_height = get_lithophane_height(lithophane_vars);
+
   backpanel_placement = [0, 0, wall_height + backpanel_thickness];
   backpanel_rotation = [180, 0, 0];
   backpanel_y_offset = show_frame ? lithophane_height + wall_thickness * 3 : 0;
@@ -49,10 +73,10 @@ if (show_backpanel) {
         difference() {
           translate(backpanel_placement) {
             rotate(backpanel_rotation) {
-              backpanel(packed_battery_vars());
+              backpanel(lithophane_vars, packed_battery_vars());
             }
           }
-          switch_placed();
+          switch_placed(lithophane_vars);
         }
       }
     }
