@@ -25,6 +25,12 @@ module keyhole(diameter = 5) {
   }
 }
 
+module placed_battery_box(battery_vars) {
+  rotate([180, 0, 90])
+    translate([0, 0, -get_battery_box_dimensions(battery_vars).z])
+      battery_box_cutout(battery_vars);
+}
+
 module backpanel(lithophane_vars, battery_vars) {
   difference() {
     color("#055366ab") {
@@ -42,12 +48,14 @@ module backpanel(lithophane_vars, battery_vars) {
         }
       }
     }
-    rotate([180, 0, 90])
-      translate([0, 0, -get_battery_box_dimensions(battery_vars).z])
-        battery_box_cutout(battery_vars);
+    placed_battery_box(battery_vars);
 
     translate([0, get_lithophane_height(lithophane_vars) / 2 * 0.7, -0.01])
       keyhole(diameter=6);
+  }
+  if ($preview) {
+    color("#d882")
+      placed_battery_box(battery_vars);
   }
 }
 

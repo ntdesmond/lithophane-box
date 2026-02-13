@@ -32,6 +32,7 @@ function packed_battery_vars() =
     notch_width,
     battery_type,
   ];
+battery_vars = packed_battery_vars();
 
 module switch_placed(lithophane_vars) {
   lithophane_width = get_lithophane_width(lithophane_vars);
@@ -73,7 +74,7 @@ if (show_backpanel) {
         difference() {
           translate(backpanel_placement) {
             rotate(backpanel_rotation) {
-              backpanel(lithophane_vars, packed_battery_vars());
+              backpanel(lithophane_vars, battery_vars);
             }
           }
           switch_placed(lithophane_vars);
