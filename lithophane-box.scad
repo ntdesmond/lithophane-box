@@ -9,7 +9,7 @@ show_backpanel = true;
 /* [Lithophane] */
 lithophane_width = 120;
 lithophane_height = 90;
-lithophane_thickness = 4;
+lithophane_thickness = 4; // .1
 
 function packed_lithophane_vars() =
   [
@@ -20,15 +20,15 @@ function packed_lithophane_vars() =
 lithophane_vars = packed_lithophane_vars();
 
 /* [Frame] */
-wall_thickness = 3;
-lip_depth = 1;
-lip_width = 0.2;
-lip_corner_radius = 3;
-led_strip_thickness = 10;
-led_lithophane_spacing = 7;
-led_backing_spacing = 5;
-frame_notch_width = 6;
-frame_notch_height = 1.2;
+wall_thickness = 3; // .1
+lip_depth = 1; // .1
+lip_width = 0.2; // .1
+lip_corner_radius = 3; // .1
+led_strip_thickness = 8; // .1
+led_lithophane_spacing = 7; // .1
+led_backing_spacing = 8; // .1
+frame_notch_width = 6; // .1
+frame_notch_height = 1.2; // .1
 
 function packed_frame_vars() =
   [
@@ -45,8 +45,8 @@ function packed_frame_vars() =
 frame_vars = packed_frame_vars();
 
 /* [Backing] */
-backing_thickness = 3;
-backing_lip_depth = 2;
+backing_thickness = 3; // .1
+backing_lip_depth = 2; // .1
 function packed_backing_vars() =
   [
     backing_thickness,
