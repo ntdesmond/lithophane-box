@@ -15,33 +15,34 @@ function get_wall_thickness(vars) = vars[0];
 function get_lip_depth(vars) = vars[1];
 function get_lip_width(vars) = vars[2];
 function get_lip_corner_radius(vars) = vars[3];
+function get_led_strip_thickness(vars) = vars[4];
+function get_led_lithophane_spacing(vars) = vars[5];
+function get_led_backing_spacing(vars) = vars[6];
+function get_frame_notch_width(vars) = vars[7];
+function get_frame_notch_height(vars) = vars[8];
 
 // Backing
 function get_backing_thickness(vars) = vars[0];
 function get_backing_lip_depth(vars) = vars[1];
 
-// Advanced
-led_strip_thickness = 10;
-led_lithophane_spacing = 7;
-led_backpanel_spacing = 5;
-frame_notch_width = 10;
-frame_notch_height = 1.2;
-
 function get_led_strip_start(frame_vars, lithophane_vars) =
   let (
     lip_depth = get_lip_depth(frame_vars),
+    led_lithophane_spacing = get_led_lithophane_spacing(frame_vars),
     lithophane_thickness = get_lithophane_thickness(lithophane_vars)
   ) (
     lip_depth + lithophane_thickness + led_lithophane_spacing
   );
 
 function get_wall_height(frame_vars, backing_vars, lithophane_vars) =
-  get_led_strip_start(frame_vars, lithophane_vars) + (
-    led_strip_thickness
+  (
+    get_led_strip_start(frame_vars, lithophane_vars)
+  ) + (
+    get_led_strip_thickness(frame_vars)
   ) + (
     get_backing_lip_depth(backing_vars)
   ) + (
-    led_backpanel_spacing
+    get_led_backing_spacing(frame_vars)
   );
 
 module lithophane_surface(lithophane_vars) {

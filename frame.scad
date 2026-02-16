@@ -6,10 +6,10 @@ frame_vars = packed_frame_vars();
 lithophane_vars = packed_lithophane_vars();
 backing_vars = packed_backing_vars();
 
-notch_width = frame_notch_width;
-notch_height = frame_notch_height;
+module notch(frame_vars) {
+  notch_width = get_frame_notch_width(frame_vars);
+  notch_height = get_frame_notch_height(frame_vars);
 
-module notch() {
   color("#ca5a109f") {
     translate([-notch_width / 2, 0, notch_height]) {
       rotate([0, 90, 0]) {
@@ -32,16 +32,17 @@ function get_notch_offset(frame_vars, lithophane_vars) =
     lithophane_width = get_lithophane_width(lithophane_vars),
     lithophane_height = get_lithophane_height(lithophane_vars),
     lithophane_thickness = get_lithophane_thickness(lithophane_vars),
-    lip_depth = get_lip_depth(frame_vars)
+    lip_depth = get_lip_depth(frame_vars),
+    notch_width = get_frame_notch_width(frame_vars)
   ) [
       lithophane_width / 2 - notch_width * 1.5,
       -lithophane_height / 2,
       lip_depth + lithophane_thickness,
   ];
 
-module notch_pair(notch_offset) {
-  translate([0, notch_offset.y, 0]) notch();
-  mirror([0, 1, 0]) translate([0, notch_offset.y, 0]) notch();
+module notch_pair(notch_offset, frame_vars) {
+  translate([0, notch_offset.y, 0]) notch(frame_vars);
+  mirror([0, 1, 0]) translate([0, notch_offset.y, 0]) notch(frame_vars);
 }
 
 module led_strip(frame_vars, lithophane_vars) {
@@ -49,7 +50,7 @@ module led_strip(frame_vars, lithophane_vars) {
     [0, 0, get_led_strip_start(frame_vars, lithophane_vars)]
   ) {
     color("#e7f071ff") {
-      linear_extrude(led_strip_thickness) {
+      linear_extrude(get_led_strip_thickness(frame_vars)) {
         difference() {
           offset(delta=0.3) lithophane_surface(lithophane_vars);
           offset(delta=-1) lithophane_surface(lithophane_vars);
@@ -96,8 +97,8 @@ module frame_with_notches(frame_vars, backing_vars, lithophane_vars) {
 
   // notches to secure lithophane in place
   translate([0, 0, notch_offset.z]) {
-    translate([notch_offset.x, 0, 0]) notch_pair(notch_offset);
-    translate([-notch_offset.x, 0, 0]) notch_pair(notch_offset);
+    translate([notch_offset.x, 0, 0]) notch_pair(notch_offset, frame_vars);
+    translate([-notch_offset.x, 0, 0]) notch_pair(notch_offset, frame_vars);
   }
 }
 

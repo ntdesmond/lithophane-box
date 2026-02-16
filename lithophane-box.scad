@@ -24,6 +24,11 @@ wall_thickness = 3;
 lip_depth = 1;
 lip_width = 0.2;
 lip_corner_radius = 3;
+led_strip_thickness = 10;
+led_lithophane_spacing = 7;
+led_backing_spacing = 5;
+frame_notch_width = 6;
+frame_notch_height = 1.2;
 
 function packed_frame_vars() =
   [
@@ -31,6 +36,11 @@ function packed_frame_vars() =
     lip_depth,
     lip_width,
     lip_corner_radius,
+    led_strip_thickness,
+    led_lithophane_spacing,
+    led_backing_spacing,
+    frame_notch_width,
+    frame_notch_height,
   ];
 frame_vars = packed_frame_vars();
 
