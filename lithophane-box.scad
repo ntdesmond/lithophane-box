@@ -1,5 +1,5 @@
 use <frame.scad>
-use <backpanel.scad>
+use <backing.scad>
 use <switch.scad>
 use <battery-box/common.scad>
 use <battery-box/battery-box.scad>
@@ -7,7 +7,7 @@ use <common.scad>
 
 /* [Parts] */
 show_frame = true;
-show_backpanel = true;
+show_backing = true;
 show_battery_box = true;
 
 /* [Lithophane] */
@@ -99,23 +99,23 @@ if (show_frame) {
   }
 }
 
-if (show_backpanel) {
+if (show_backing) {
   lithophane_height = get_lithophane_height(lithophane_vars);
   wall_thickness = get_wall_thickness(frame_vars);
   wall_height = get_wall_height(frame_vars, backing_vars, lithophane_vars);
   backing_thickness = get_backing_thickness(backing_vars);
 
-  backpanel_placement = [0, 0, wall_height + backing_thickness];
-  backpanel_rotation = [180, 0, 0];
-  backpanel_y_offset = show_frame || show_battery_box ? lithophane_height + wall_thickness * 3 : 0;
+  backing_placement = [0, 0, wall_height + backing_thickness];
+  backing_rotation = [180, 0, 0];
+  backing_y_offset = show_frame || show_battery_box ? lithophane_height + wall_thickness * 3 : 0;
 
-  translate([0, backpanel_y_offset, 0]) {
-    rotate(backpanel_rotation) {
-      translate(-backpanel_placement) {
+  translate([0, backing_y_offset, 0]) {
+    rotate(backing_rotation) {
+      translate(-backing_placement) {
         difference() {
-          translate(backpanel_placement) {
-            rotate(backpanel_rotation) {
-              backpanel(wall_thickness, backing_vars, lithophane_vars, battery_vars);
+          translate(backing_placement) {
+            rotate(backing_rotation) {
+              backing(wall_thickness, backing_vars, lithophane_vars, battery_vars);
             }
           }
           switch_placed(wall_height, lithophane_vars);

@@ -32,7 +32,7 @@ module placed_battery_box(battery_vars) {
       battery_box_cutout(battery_vars);
 }
 
-module backpanel(wall_thickness, backing_vars, lithophane_vars, battery_vars) {
+module backing(wall_thickness, backing_vars, lithophane_vars, battery_vars) {
   backing_thickness = get_backing_thickness(backing_vars);
   backing_lip_depth = get_backing_lip_depth(backing_vars);
 
@@ -63,7 +63,7 @@ module backpanel(wall_thickness, backing_vars, lithophane_vars, battery_vars) {
   }
 }
 
-backpanel(
+backing(
   get_wall_thickness(packed_frame_vars()),
   packed_backing_vars(),
   packed_lithophane_vars(),
