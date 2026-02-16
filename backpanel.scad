@@ -31,11 +31,11 @@ module placed_battery_box(battery_vars) {
       battery_box_cutout(battery_vars);
 }
 
-module backpanel(lithophane_vars, battery_vars) {
+module backpanel(wall_thickness, lithophane_vars, battery_vars) {
   difference() {
     color("#055366ab") {
       linear_extrude(backpanel_thickness) {
-        box_surface(lithophane_vars);
+        box_surface(wall_thickness, lithophane_vars);
       }
       translate([0, 0, backpanel_thickness]) {
         linear_extrude(backpanel_protrusion) {
@@ -60,7 +60,7 @@ module backpanel(lithophane_vars, battery_vars) {
 }
 
 backpanel(
-  // only for preview
+  get_wall_thickness(packed_frame_vars()),
   packed_lithophane_vars(),
   packed_battery_vars()
 );

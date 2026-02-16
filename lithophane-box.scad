@@ -19,6 +19,17 @@ function packed_lithophane_vars() =
   ];
 lithophane_vars = packed_lithophane_vars();
 
+/* [Frame] */
+lip_depth = 1;
+wall_thickness = 5;
+
+function packed_frame_vars() =
+  [
+    lip_depth,
+    wall_thickness,
+  ];
+frame_vars = packed_frame_vars();
+
 /* [Battery box] */
 battery_count = 3; // I use 3xAAA for 5v LED strip
 stack_in_line = false;
@@ -34,12 +45,9 @@ function packed_battery_vars() =
   ];
 battery_vars = packed_battery_vars();
 
-module switch_placed(lithophane_vars) {
+module switch_placed(wall_height, lithophane_vars) {
   lithophane_width = get_lithophane_width(lithophane_vars);
   lithophane_height = get_lithophane_height(lithophane_vars);
-  wall_height = get_wall_height(
-    get_lithophane_thickness(lithophane_vars)
-  );
 
   translate(
     [
@@ -53,16 +61,15 @@ module switch_placed(lithophane_vars) {
 
 if (show_frame) {
   difference() {
-    frame(lithophane_vars);
-    switch_placed(lithophane_vars);
+    frame(frame_vars, lithophane_vars);
+    switch_placed(get_wall_height(frame_vars, lithophane_vars), lithophane_vars);
   }
 }
 
 if (show_backpanel) {
-  wall_height = get_wall_height(
-    get_lithophane_thickness(lithophane_vars)
-  );
   lithophane_height = get_lithophane_height(lithophane_vars);
+  wall_thickness = get_wall_thickness(frame_vars);
+  wall_height = get_wall_height(frame_vars, lithophane_vars);
 
   backpanel_placement = [0, 0, wall_height + backpanel_thickness];
   backpanel_rotation = [180, 0, 0];
@@ -74,10 +81,10 @@ if (show_backpanel) {
         difference() {
           translate(backpanel_placement) {
             rotate(backpanel_rotation) {
-              backpanel(lithophane_vars, battery_vars);
+              backpanel(wall_thickness, lithophane_vars, battery_vars);
             }
           }
-          switch_placed(lithophane_vars);
+          switch_placed(wall_height, lithophane_vars);
         }
       }
     }
