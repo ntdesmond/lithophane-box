@@ -1,64 +1,15 @@
 use <spring.scad>;
 use <terminal.scad>;
+use <vars.scad>;
+use <common.scad>;
 
 //only for preview
 use <../lithophane-box.scad>
 default_vars = packed_battery_vars();
 
-function get_battery_count(vars) = vars[0];
-function get_stack_in_line(vars) = vars[1];
-function get_notch_width(vars) = vars[2];
-function get_battery_type(vars) = vars[3];
-
-/* [Hidden] */
-battery_sizes = [
-  [14.5, 50.5], // AA
-  [10.5, 45], // AAA
-];
-
-function get_battery_size(vars) = battery_sizes[get_battery_type(vars)];
-
-thickness = 0.8;
-spacing = [0.7, 0.5];
-
-spring_thickness = 0.5;
-
-function get_spring_size(vars) =
-  let (
-    battery_size = get_battery_size(vars)
-  ) [battery_size.x, 3, battery_size.x - 0.05];
-
-function get_cell_without_spring_length(vars) =
-  let (
-    battery_size = get_battery_size(vars)
-  ) battery_size.y + spacing.y;
-
-function get_cell_with_spring_length(vars) =
-  let (
-    spring_size = get_spring_size(vars)
-  ) spring_size.y + get_cell_without_spring_length(vars);
-
-function get_battery_box_dimensions(vars) =
-  let (
-    stack_in_line = get_stack_in_line(vars),
-    battery_count = get_battery_count(vars),
-    battery_size = get_battery_size(vars),
-    cell_with_spring_length = get_cell_with_spring_length(vars),
-    cell_without_spring_length = get_cell_without_spring_length(vars)
-  ) (stack_in_line) ?
-    [
-      battery_size.x + spacing.x * 2,
-      // wall_length
-      cell_with_spring_length + cell_without_spring_length * (battery_count - 1),
-      battery_size.x,
-    ]
-  : [
-    battery_size.x * battery_count + spacing.x * (battery_count + 1),
-    cell_with_spring_length,
-    battery_size.x,
-  ];
-
-function get_notch_height(vars) = get_notch_width(vars) * sqrt(2);
+thickness = get_thickness();
+spacing = get_spacing();
+spring_thickness = get_spring_thickness();
 
 module inline_separator(vars) {
   battery_size = get_battery_size(vars);
@@ -190,6 +141,7 @@ module battery_box(vars) {
   first_cell_size = [battery_size.x, spring_size.y + battery_size.y];
   inline_cell_size = [battery_size.x, spacing.y + battery_size.y];
   parallel_cell_size = [spacing.x + battery_size.x, battery_size.y];
+
   if (stack_in_line) {
     wall_length = cell_with_spring_length + cell_without_spring_length * (battery_count - 1);
     wall(vars, wall_length);

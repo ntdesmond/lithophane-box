@@ -1,4 +1,5 @@
 include <common.scad>
+use <battery-box/common.scad>
 use <battery-box/battery-box.scad>
 
 //only for preview
@@ -26,7 +27,7 @@ module keyhole(diameter = 5) {
 }
 
 module placed_battery_box(battery_vars) {
-  rotate([180, 0, 90])
+  rotate([180, 0, get_battery_box_rotation(battery_vars)])
     translate([0, 0, -get_battery_box_dimensions(battery_vars).z])
       battery_box_cutout(battery_vars);
 }

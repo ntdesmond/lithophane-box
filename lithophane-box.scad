@@ -1,10 +1,14 @@
 use <frame.scad>
 use <backpanel.scad>
 use <switch.scad>
-include <common.scad>
+use <battery-box/common.scad>
+use <battery-box/battery-box.scad>
+use <common.scad>
 
+/* [Parts] */
 show_frame = true;
 show_backpanel = true;
+show_battery_box = true;
 
 /* [Lithophane] */
 lithophane_width = 120;
@@ -58,7 +62,8 @@ backing_vars = packed_backing_vars();
 battery_count = 3; // I use 3xAAA for 5v LED strip
 stack_in_line = false;
 notch_width = 0.8; // .1
-battery_type = 1; // [0:AA, 1:AAA]
+battery_type = 1; // [0:AA, 1:AAA]'
+battery_box_rotation = 90; // 90
 
 function packed_battery_vars() =
   [
@@ -66,6 +71,7 @@ function packed_battery_vars() =
     stack_in_line,
     notch_width,
     battery_type,
+    battery_box_rotation,
   ];
 battery_vars = packed_battery_vars();
 
@@ -101,7 +107,7 @@ if (show_backpanel) {
 
   backpanel_placement = [0, 0, wall_height + backing_thickness];
   backpanel_rotation = [180, 0, 0];
-  backpanel_y_offset = show_frame ? lithophane_height + wall_thickness * 3 : 0;
+  backpanel_y_offset = show_frame || show_battery_box ? lithophane_height + wall_thickness * 3 : 0;
 
   translate([0, backpanel_y_offset, 0]) {
     rotate(backpanel_rotation) {
@@ -117,4 +123,17 @@ if (show_backpanel) {
       }
     }
   }
+}
+
+if (show_battery_box) {
+  battery_box_dimensions = get_battery_box_dimensions(battery_vars);
+  rotate([0, 0, get_battery_box_rotation(battery_vars)])
+    translate(
+      -[
+        battery_box_dimensions.x / 2,
+        battery_box_dimensions.y / 2,
+        0,
+      ]
+    )
+      battery_box(battery_vars);
 }
