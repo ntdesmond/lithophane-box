@@ -16,9 +16,9 @@ function get_lip_depth(vars) = vars[1];
 function get_lip_width(vars) = vars[2];
 function get_lip_corner_radius(vars) = vars[3];
 
-// Back panel
-backpanel_thickness = 5;
-backpanel_protrusion = 5;
+// Backing
+function get_backing_thickness(vars) = vars[0];
+function get_backing_lip_depth(vars) = vars[1];
 
 // Advanced
 led_strip_thickness = 10;
@@ -35,11 +35,11 @@ function get_led_strip_start(frame_vars, lithophane_vars) =
     lip_depth + lithophane_thickness + led_lithophane_spacing
   );
 
-function get_wall_height(frame_vars, lithophane_vars) =
+function get_wall_height(frame_vars, backing_vars, lithophane_vars) =
   get_led_strip_start(frame_vars, lithophane_vars) + (
     led_strip_thickness
   ) + (
-    backpanel_protrusion
+    get_backing_lip_depth(backing_vars)
   ) + (
     led_backpanel_spacing
   );

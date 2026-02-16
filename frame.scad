@@ -4,6 +4,7 @@ include <common.scad>
 use <lithophane-box.scad>
 frame_vars = packed_frame_vars();
 lithophane_vars = packed_lithophane_vars();
+backing_vars = packed_backing_vars();
 
 notch_width = frame_notch_width;
 notch_height = frame_notch_height;
@@ -64,12 +65,12 @@ module led_strip(frame_vars, lithophane_vars) {
   }
 }
 
-module frame_with_notches(frame_vars, lithophane_vars) {
+module frame_with_notches(frame_vars, backing_vars, lithophane_vars) {
   lip_depth = get_lip_depth(frame_vars);
   color("#0abeebab") {
     // walls
     linear_extrude(
-      height=get_wall_height(frame_vars, lithophane_vars)
+      height=get_wall_height(frame_vars, backing_vars, lithophane_vars)
     ) {
       difference() {
         box_surface(get_wall_thickness(frame_vars), lithophane_vars);
@@ -100,10 +101,10 @@ module frame_with_notches(frame_vars, lithophane_vars) {
   }
 }
 
-module frame(frame_vars, lithophane_vars) {
+module frame(frame_vars, backing_vars, lithophane_vars) {
 
   difference() {
-    frame_with_notches(frame_vars, lithophane_vars);
+    frame_with_notches(frame_vars, backing_vars, lithophane_vars);
     led_strip(frame_vars, lithophane_vars);
   }
   if ($preview) {
@@ -111,4 +112,4 @@ module frame(frame_vars, lithophane_vars) {
   }
 }
 
-frame(frame_vars, lithophane_vars);
+frame(frame_vars, backing_vars, lithophane_vars);

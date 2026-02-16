@@ -20,9 +20,9 @@ function packed_lithophane_vars() =
 lithophane_vars = packed_lithophane_vars();
 
 /* [Frame] */
-wall_thickness = 5;
+wall_thickness = 3;
 lip_depth = 1;
-lip_width = 0.5;
+lip_width = 0.2;
 lip_corner_radius = 3;
 
 function packed_frame_vars() =
@@ -34,10 +34,20 @@ function packed_frame_vars() =
   ];
 frame_vars = packed_frame_vars();
 
+/* [Backing] */
+backing_thickness = 3;
+backing_lip_depth = 2;
+function packed_backing_vars() =
+  [
+    backing_thickness,
+    backing_lip_depth,
+  ];
+backing_vars = packed_backing_vars();
+
 /* [Battery box] */
 battery_count = 3; // I use 3xAAA for 5v LED strip
 stack_in_line = false;
-notch_width = 1; // .1
+notch_width = 0.8; // .1
 battery_type = 1; // [0:AA, 1:AAA]
 
 function packed_battery_vars() =
@@ -65,17 +75,21 @@ module switch_placed(wall_height, lithophane_vars) {
 
 if (show_frame) {
   difference() {
-    frame(frame_vars, lithophane_vars);
-    switch_placed(get_wall_height(frame_vars, lithophane_vars), lithophane_vars);
+    frame(frame_vars, backing_vars, lithophane_vars);
+    switch_placed(
+      get_wall_height(frame_vars, backing_vars, lithophane_vars),
+      lithophane_vars
+    );
   }
 }
 
 if (show_backpanel) {
   lithophane_height = get_lithophane_height(lithophane_vars);
   wall_thickness = get_wall_thickness(frame_vars);
-  wall_height = get_wall_height(frame_vars, lithophane_vars);
+  wall_height = get_wall_height(frame_vars, backing_vars, lithophane_vars);
+  backing_thickness = get_backing_thickness(backing_vars);
 
-  backpanel_placement = [0, 0, wall_height + backpanel_thickness];
+  backpanel_placement = [0, 0, wall_height + backing_thickness];
   backpanel_rotation = [180, 0, 0];
   backpanel_y_offset = show_frame ? lithophane_height + wall_thickness * 3 : 0;
 
@@ -85,7 +99,7 @@ if (show_backpanel) {
         difference() {
           translate(backpanel_placement) {
             rotate(backpanel_rotation) {
-              backpanel(wall_thickness, lithophane_vars, battery_vars);
+              backpanel(wall_thickness, backing_vars, lithophane_vars, battery_vars);
             }
           }
           switch_placed(wall_height, lithophane_vars);
