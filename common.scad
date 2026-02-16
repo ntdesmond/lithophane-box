@@ -11,8 +11,10 @@ function get_lithophane_size(vars) =
   ) [lithophane_width, lithophane_height];
 
 // Frame
-function get_lip_depth(vars) = vars[0];
-function get_wall_thickness(vars) = vars[1];
+function get_wall_thickness(vars) = vars[0];
+function get_lip_depth(vars) = vars[1];
+function get_lip_width(vars) = vars[2];
+function get_lip_corner_radius(vars) = vars[3];
 
 // Back panel
 backpanel_thickness = 5;

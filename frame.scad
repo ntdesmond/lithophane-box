@@ -66,34 +66,37 @@ module led_strip(frame_vars, lithophane_vars) {
 
 module frame_with_notches(frame_vars, lithophane_vars) {
   lip_depth = get_lip_depth(frame_vars);
-  union() {
-    color("#0abeebab") {
-      // walls
-      linear_extrude(
-        height=get_wall_height(frame_vars, lithophane_vars)
-      ) {
-        difference() {
-          box_surface(get_wall_thickness(frame_vars), lithophane_vars);
-          lithophane_surface(lithophane_vars);
-        }
-      }
-
-      // thin frame in front of lithophane
-      linear_extrude(lip_depth) {
-        difference() {
-          lithophane_surface(lithophane_vars);
-          offset(r=3) offset(delta=-4) lithophane_surface(lithophane_vars);
-        }
+  color("#0abeebab") {
+    // walls
+    linear_extrude(
+      height=get_wall_height(frame_vars, lithophane_vars)
+    ) {
+      difference() {
+        box_surface(get_wall_thickness(frame_vars), lithophane_vars);
+        lithophane_surface(lithophane_vars);
       }
     }
 
-    notch_offset = get_notch_offset(frame_vars, lithophane_vars);
+    // lip (thin frame in front of lithophane)
+    linear_extrude(lip_depth) {
+      lip_corner_radius = get_lip_corner_radius(frame_vars);
+      lip_width = get_lip_width(frame_vars);
 
-    // notches to secure lithophane in place
-    translate([0, 0, notch_offset.z]) {
-      translate([notch_offset.x, 0, 0]) notch_pair(notch_offset);
-      translate([-notch_offset.x, 0, 0]) notch_pair(notch_offset);
+      difference() {
+        lithophane_surface(lithophane_vars);
+        offset(r=lip_corner_radius)
+          offset(delta=-(lip_corner_radius + lip_width))
+            lithophane_surface(lithophane_vars);
+      }
     }
+  }
+
+  notch_offset = get_notch_offset(frame_vars, lithophane_vars);
+
+  // notches to secure lithophane in place
+  translate([0, 0, notch_offset.z]) {
+    translate([notch_offset.x, 0, 0]) notch_pair(notch_offset);
+    translate([-notch_offset.x, 0, 0]) notch_pair(notch_offset);
   }
 }
 

@@ -20,13 +20,17 @@ function packed_lithophane_vars() =
 lithophane_vars = packed_lithophane_vars();
 
 /* [Frame] */
-lip_depth = 1;
 wall_thickness = 5;
+lip_depth = 1;
+lip_width = 0.5;
+lip_corner_radius = 3;
 
 function packed_frame_vars() =
   [
-    lip_depth,
     wall_thickness,
+    lip_depth,
+    lip_width,
+    lip_corner_radius,
   ];
 frame_vars = packed_frame_vars();
 
